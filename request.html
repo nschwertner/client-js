@@ -56,7 +56,7 @@
                 <div class="codepen-later">
                     <pre data-lang="js" class="dead-code">const client = new FHIR.client("https://r3.smarthealthit.org");
 client.request("Patient/2e27c71e-30c8-4ceb-8c1c-5641e066c0a4");</pre>
-                    <pre data-lang="js" class="live-code">function display(data, append) {
+                    <pre data-lang="js" class="live-code">function display(data) {
     const output = document.getElementById("output");
     output.innerText = data instanceof Error ?
         String(data) :
@@ -87,7 +87,7 @@ client.request("Patient/2e27c71e-30c8-4ceb-8c1c-5641e066c0a4")
 });
 
 client.request(`Patient/${client.patient.id}`);</pre>
-                    <pre data-lang="js" class="live-code">function display(data, append) {
+                    <pre data-lang="js" class="live-code">function display(data) {
     const output = document.getElementById("output");
     output.innerText = data instanceof Error ?
         String(data) :
@@ -168,7 +168,7 @@ client.request(client.user.fhirUser);</pre>
 "pmtxVVHiVf-FYXzTFmn4cGe2PsNJfBl8R_zow2n6qaSANdvSxJDE4D" +
 "UgIJ6H18wiSJJHp6Plf_bapccAwxbx-zZCw";
                     
-function display(data, append) {
+function display(data) {
     const output = document.getElementById("output");
     output.innerText = data instanceof Error ?
         String(data) :
@@ -228,7 +228,7 @@ const client = new FHIR.client({
 
 const getPath = client.getPath;
 
-function display(data, append) {
+function display(data) {
     const output = document.getElementById("output");
     output.innerText = data instanceof Error ?
         String(data) :
@@ -264,7 +264,7 @@ client.request("/Encounter/3d1ae6a9-b8c1-4c12-a8ba-b44d96ddfe24", {
 });</pre>
                     <pre data-lang="js" class="live-code">const client = new FHIR.client("https://r3.smarthealthit.org");
 
-function display(data, append) {
+function display(data) {
     const output = document.getElementById("output");
     output.innerText = data instanceof Error ?
         String(data) :
@@ -294,7 +294,7 @@ client.request("/Encounter/3d1ae6a9-b8c1-4c12-a8ba-b44d96ddfe24", {
     resolveReferences: ["serviceProvider", "subject"],
     graph: false
 });</pre>
-                    <pre data-lang="js" class="live-code">function display(data, append) {
+                    <pre data-lang="js" class="live-code">function display(data) {
     const output = document.getElementById("output");
     output.innerText = data instanceof Error ?
         String(data) :
@@ -319,7 +319,7 @@ client.request("/Encounter/3d1ae6a9-b8c1-4c12-a8ba-b44d96ddfe24", {
                 <div class="codepen-later">
                     <pre data-lang="js" class="dead-code">const client = new FHIR.client("https://r3.smarthealthit.org");
 client.request("/Patient", { pageLimit: 2 });</pre>
-                    <pre data-lang="js" class="live-code">function display(data, append) {
+                    <pre data-lang="js" class="live-code">function display(data) {
     const output = document.getElementById("output");
     output.innerText = data instanceof Error ?
         String(data) :
@@ -340,7 +340,7 @@ client.request("/Patient", { pageLimit: 2 }).then(display).catch(display);</pre>
                 <div class="codepen-later">
                     <pre data-lang="js" class="dead-code">const client = new FHIR.client("https://r3.smarthealthit.org");
 client.request("/Claim", { pageLimit: 0 });</pre>
-                    <pre data-lang="js" class="live-code">function display(data, append) {
+                    <pre data-lang="js" class="live-code">function display(data) {
     const output = document.getElementById("output");
     output.innerText = data instanceof Error ?
         String(data) :
