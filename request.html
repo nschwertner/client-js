@@ -84,7 +84,7 @@ client.request("Patient/2e27c71e-30c8-4ceb-8c1c-5641e066c0a4")
 <div class="codepen-later">
 <pre data-lang="js" class="dead-code">
 const client = new FHIR.client({
-    serviceUrl: "https://r3.smarthealthit.org",
+    serverUrl: "https://r3.smarthealthit.org",
     patientId: "2e27c71e-30c8-4ceb-8c1c-5641e066c0a4"
 });
 
@@ -99,7 +99,7 @@ function display(data, append) {
 }
 
 const client = new FHIR.client({
-    serviceUrl: "https://r3.smarthealthit.org",
+    serverUrl: "https://r3.smarthealthit.org",
     patientId: "2e27c71e-30c8-4ceb-8c1c-5641e066c0a4"
 });
 
@@ -139,7 +139,7 @@ FHIR.oauth2.ready(client => client.request(`Patient/${client.patient.id}`));
 <div class="codepen-later">
 <pre data-lang="js" class="dead-code">
 const client = new FHIR.client({
-    serviceUrl: "https://r3.smarthealthit.org",
+    serverUrl: "https://r3.smarthealthit.org",
     userId: "Practitioner/smart-Practitioner-72080416"
 });
 
@@ -154,7 +154,7 @@ function display(data, append) {
 }
         
 const client = new FHIR.client({
-    serviceUrl: "https://r3.smarthealthit.org",
+    serverUrl: "https://r3.smarthealthit.org",
     userId: "Practitioner/smart-Practitioner-72080416"
 });
 
@@ -189,7 +189,7 @@ FHIR.oauth2.ready(client => client.request(client.user.id));
 <div class="codepen-later">
 <pre data-lang="babel" class="dead-code">
 const { request, getPath } = new FHIR.client({
-    serviceUrl: "https://r3.smarthealthit.org"
+    serverUrl: "https://r3.smarthealthit.org"
 });
 
 request(`/MedicationRequest?patient=smart-1642068`, {
@@ -203,7 +203,7 @@ request(`/MedicationRequest?patient=smart-1642068`, {
 const rxnorm = "http://www.nlm.nih.gov/research/umls/rxnorm";
 
 const { request, getPath } = new FHIR.client({
-    serviceUrl: "https://r3.smarthealthit.org"
+    serverUrl: "https://r3.smarthealthit.org"
 });
 
 function display(data, append) {
