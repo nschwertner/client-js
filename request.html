@@ -75,8 +75,7 @@ client.request("Patient/2e27c71e-30c8-4ceb-8c1c-5641e066c0a4")
                 <h3>Display the current patient</h3>
                 <p>
                     Authenticated clients will have <code>patient.id</code>. This example uses an open FHIR
-                    server so we pass a <code>patientId</code> option instead, to manually specify which
-                    the current patient is.
+                    server so we pass a <code>patient</code> to manually specify which the current patient is.
                 </p>
                 <div class="codepen-later">
                     <pre data-lang="js" class="dead-code">const client = new FHIR.client({
@@ -200,7 +199,7 @@ FHIR.oauth2.authorize({
 });
 
 // index.html
-FHIR.oauth2.ready(client => client.request(client.user.id));</pre>
+FHIR.oauth2.ready(client => client.request(client.user.fhirUser));</pre>
                 </div>
             </section>
 
@@ -253,7 +252,7 @@ client.request(`/MedicationRequest?patient=smart-1642068`, {
             <section>
                 <h3>Resolve references</h3>
                 <p>
-                    You can pass one or more reference pats aa <code>resolveReferences</code>
+                    You can pass one or more reference paths as <code>resolveReferences</code>
                     option. The final result will contain the references replaced with resolved
                     resources.
                 </p> 
@@ -283,7 +282,7 @@ client.request("/Encounter/3d1ae6a9-b8c1-4c12-a8ba-b44d96ddfe24", {
                 <p>
                     In most cases having the resolved references mounted on the result structure
                     is very convenient. However, sometimes you might want to keep the original
-                    response as is or you may want to have a map of resolved references that can
+                    response as is, or you may want to have a map of resolved references that can
                     be re-used later. To do so, you can use the same <code>resolveReferences</code>
                     option but combine it with <code>graph: false</code>. Then, the result will
                     contain two properties - <code>data</code> and <code>references</code>. Example:
@@ -348,7 +347,8 @@ client.request("/Claim", { pageLimit: 0 });</pre>
 }
 
 const client = new FHIR.client("https://r3.smarthealthit.org");
-client.request("/Claim", { pageLimit: 0 }).then(display).catch(display);</pre>
+client.request("/Claim", { pageLimit: 0 })
+    .then(display).catch(display);</pre>
                 </div>
             </section>
 
