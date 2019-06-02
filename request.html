@@ -85,7 +85,9 @@ client.request("Patient/2e27c71e-30c8-4ceb-8c1c-5641e066c0a4")
 <pre data-lang="js" class="dead-code">
 const client = new FHIR.client({
     serverUrl: "https://r3.smarthealthit.org",
-    patientId: "2e27c71e-30c8-4ceb-8c1c-5641e066c0a4"
+    tokenResponse: {
+        patient: "2e27c71e-30c8-4ceb-8c1c-5641e066c0a4"
+    }
 });
 
 client.request(`Patient/${client.patient.id}`);
@@ -379,7 +381,7 @@ client.request("/Claim", { pageLimit: 0 }).then(display).catch(display);
                         tags: [],
                         stylesheets: [],
                         scripts: [
-                            "https://docs.smarthealthit.org/client-js/build/fhir-client.min.js"
+                            "https://docs.smarthealthit.org/client-js/build/fhir-client.js"
                         ]
                     })
                 });
