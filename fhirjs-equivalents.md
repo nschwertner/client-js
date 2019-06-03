@@ -84,7 +84,7 @@ client.request({
 ## Building query strings
 Without fhir.js the mongo-like syntax is not available. However, the `request`
 function also accepts `URL` instances as it's first argument (or as value of the `url`)
-property of the first argument is an object. By using `fhir.js`, your browser
+property of the first argument if that is an object. By using `fhir.js`, your browser
 will be polyfill-ed if needed and `URL` and `URLSearchParams` will always be
 available in the global scope (even in Node). Here are some examples of building search queries:
 
