@@ -17,11 +17,11 @@ It works both in browsers (IE10+) and on the server (NodeJS).
     - [Native Example](https://codesandbox.io/s/brave-wildflower-q4mhq)
     - [HAPI Example](https://codesandbox.io/s/fhir-client-hapi-myq5q)
     - [Express + fhir.js Example](https://codesandbox.io/s/fhir-client-express-and-fhirjs-4t1mp)
-- [SMART API](smart-api)
-- Client PI
-- Integration with Fhir.js
-- Contributing and Development
-- Debugging
+- [SMART API](#smart-api)
+- [Client PI](#client)
+- [Integration with Fhir.js](#fhirjs-integration)
+- [Contributing and Development](#contributing-and-development)
+- [Debugging](#debugging)
 
 ## Installation
 
@@ -106,6 +106,9 @@ Once you have obtained that "smart" object, the API that it exposes is exactly
 the same for the browser and the server.
 
 Read the [SMART API Documentation](api)
+
+
+   
 
 ### `Client`
 This is a FHIR client that is returned to you from the `ready()` call. You can also create it yourself if needed:
