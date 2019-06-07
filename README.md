@@ -6,6 +6,23 @@ It works both in browsers (IE10+) and on the server (NodeJS).
 
 > This the documentation for the new version. If you want to migrate from older versions, make sure you check out [what's new in v2](http://docs.smarthealthit.org/client-js/v2.html). For older versions see http://docs.smarthealthit.org/clients/javascript/
 
+## TOC
+- [Installation](#installation)
+- [Browser Usage](#browser-usage)
+    - [Live Examples](https://35u09.codesandbox.io/)
+    - [Live Examples Code](https://codesandbox.io/s/fhir-client-browser-examples-35u09)
+- [Server Usage](#server-sage)
+    - [API Details](node)
+    - [Express Example](https://codesandbox.io/s/jovial-dew-c0che)
+    - [Native Example](https://codesandbox.io/s/brave-wildflower-q4mhq)
+    - [HAPI Example](https://codesandbox.io/s/fhir-client-hapi-myq5q)
+    - [Express + fhir.js Example](https://codesandbox.io/s/fhir-client-express-and-fhirjs-4t1mp)
+- [SMART API](api)
+- Client PI
+- Integration with Fhir.js
+- Contributing and Development
+- Debugging
+
 ## Installation
 
 Install from npm:
@@ -46,7 +63,7 @@ FHIR.oauth2.ready()
 </script>
 ```
 
-## Server Usage (experimental)
+## Server Usage
 The server is fundamentally different environment than the browser but the
 API is very similar. Here is a simple express example:
 ```js
@@ -350,7 +367,7 @@ client.getPath(data, "a.b.c.d.e") // => undefined
 
 ## Fhir.js Integration
 Since v2.0.0 this library no longer includes fhir.js. That architecture was extremely difficult to maintain. Fhir.js is now an optional dependency, meaning that it is not available by default, unless you include it in the page. Our goal is to provide simple
-alternative to fhir.js - most of it should be possible via `client.request`. Please see the [Examples](http://docs.smarthealthit.org/client-js/fhirjs-equivalents)
+alternative to fhir.js - most of it should be possible via `client.request`. Please see the [Examples](fhirjs-equivalents)
 
 #### Reasons to use fhir.js
 1. If you have old apps using legacy API like `client.api.anyFhirJsMethod()` or `client.patient.api.anyFhirJsMethod()`
