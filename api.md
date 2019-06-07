@@ -2,7 +2,7 @@
 
 **Fetch single resource**
 ```js
-const client = window.FHIR.client({ serviceUrl: "https://r3.smarthealthit.org" });
+const client = FHIR.client("https://r3.smarthealthit.org");
 const result = await client.request("/Patient/2e27c71e-30c8-4ceb-8c1c-5641e066c0a4");
 ```
 
