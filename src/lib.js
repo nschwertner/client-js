@@ -4,6 +4,8 @@
  */
 
 const HttpError = require("./HttpError");
+
+// #!debug
 const debug     = require("debug")("FHIR");
 
 function isBrowser() {
@@ -295,7 +297,10 @@ module.exports = {
     makeArray,
     randomString,
     isBrowser,
+
+    // #!debug
     debug,
+
     checkResponse,
     responseToJSON,
     humanizeError,

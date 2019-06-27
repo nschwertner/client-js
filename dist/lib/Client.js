@@ -1,6 +1,7 @@
 /// <reference path="types.d.ts" />
 const {
   absolute,
+  // #!debug
   debug: _debug,
   getPath,
   setPath,
@@ -11,7 +12,8 @@ const {
   byCode,
   byCodes,
   units
-} = require("./lib");
+} = require("./lib"); // #!debug
+
 
 const debug = _debug.extend("client");
 
@@ -95,6 +97,7 @@ function resolveRefs(obj, fhirOptions, cache, client) {
     let index = paths.indexOf(p, i + 1);
 
     if (index > -1) {
+      // #!debug
       debug("Duplicated reference path \"%s\"", p);
       return false;
     }
@@ -255,24 +258,28 @@ class FhirClient {
       // We have been authorized against this server but we don't know
       // the patient. This should be a scope issue.
       if (!tokenResponse.patient) {
+        // #!if debug
         if (!(this.state.scope || "").match(/\blaunch(\/patient)?\b/)) {
           debug(str.noScopeForId, "patient", "patient");
         } else {
           // The server should have returned the patient!
           debug("The ID of the selected patient is not available. Please check if your server supports that.");
-        }
+        } // #!endif
+
 
         return null;
       }
 
       return tokenResponse.patient;
-    }
+    } // #!if debug
+
 
     if (this.state.authorizeUri) {
       debug(str.noIfNoAuth, "the ID of the selected patient");
     } else {
       debug(str.noFreeContext, "selected patient");
-    }
+    } // #!endif
+
 
     return null;
   }
@@ -291,24 +298,28 @@ class FhirClient {
       // We have been authorized against this server but we don't know
       // the encounter. This should be a scope issue.
       if (!tokenResponse.encounter) {
+        // #!if debug
         if (!(this.state.scope || "").match(/\blaunch(\/encounter)?\b/)) {
           debug(str.noScopeForId, "encounter", "encounter");
         } else {
           // The server should have returned the encounter!
           debug("The ID of the selected encounter is not available. Please check if your server supports that, and that the selected patient has any recorded encounters.");
-        }
+        } // #!endif
+
 
         return null;
       }
 
       return tokenResponse.encounter;
-    }
+    } // #!if debug
+
 
     if (this.state.authorizeUri) {
       debug(str.noIfNoAuth, "the ID of the selected encounter");
     } else {
       debug(str.noFreeContext, "selected encounter");
-    }
+    } // #!endif
+
 
     return null;
   }
@@ -328,6 +339,7 @@ class FhirClient {
       // the id_token. This should be a scope issue.
 
       if (!idToken) {
+        // #!if debug
         const hasOpenid = scope.match(/\bopenid\b/);
         const hasProfile = scope.match(/\bprofile\b/);
         const hasFhirUser = scope.match(/\bfhirUser\b/);
@@ -337,19 +349,22 @@ class FhirClient {
         } else {
           // The server should have returned the id_token!
           debug("The id_token is not available. Please check if your server supports that.");
-        }
+        } // #!endif
+
 
         return null;
       }
 
       return jwtDecode(idToken);
-    }
+    } // #!if debug
+
 
     if (this.state.authorizeUri) {
       debug(str.noIfNoAuth, "the id_token");
     } else {
       debug(str.noFreeContext, "id_token");
-    }
+    } // #!endif
+
 
     return null;
   }
@@ -442,6 +457,7 @@ class FhirClient {
 
 
   async request(requestOptions, fhirOptions = {}, _resolvedRefs = {}) {
+    // #!debug
     const debug = _debug.extend("client:request");
 
     if (!requestOptions) {
@@ -477,10 +493,13 @@ class FhirClient {
       fhirOptions.pageLimit = 1;
     }
 
-    const hasPageCallback = typeof fhirOptions.onPage == "function";
-    debug("%s, options: %O, fhirOptions: %O", url, requestOptions, fhirOptions);
+    const hasPageCallback = typeof fhirOptions.onPage == "function"; // #!if debug
+
+    debug("%s, options: %O, fhirOptions: %O", url, requestOptions, fhirOptions); // #!endif
+
     return request(url, requestOptions) // Automatic re-auth via refresh token -----------------------------
     .catch(error => {
+      // #!debug
       debug("%o", error);
 
       if (error.status == 401 && fhirOptions.useRefreshToken !== false) {
@@ -506,11 +525,13 @@ class FhirClient {
 
 
         if (fhirOptions.useRefreshToken === false) {
+          // #!debug
           debug("Your session has expired and the useRefreshToken option is set to false. Please re-launch the app.");
           await this._clearState();
           throw new Error(str.expired);
         } // otherwise -> auto-refresh failed. Session expired.
         // Need to re-launch. Clear state to start over!
+        // #!debug
 
 
         debug("Auto-refresh failed! Please re-launch the app.");
@@ -519,14 +540,16 @@ class FhirClient {
       }
 
       throw error;
-    }) // Handle 403 ------------------------------------------------------
+    }) // #!if debug
+    // Handle 403 ------------------------------------------------------
     .catch(error => {
       if (error.status == 403) {
         debug("Permission denied! Please make sure that you have requested the proper scopes.");
       }
 
       throw error;
-    }) // Handle raw requests (anything other than json) ------------------
+    }) // #!endif
+    // Handle raw requests (anything other than json) ------------------
     .then(data => {
       if (!data) return data;
       if (typeof data == "string") return data;
@@ -601,9 +624,11 @@ class FhirClient {
 
 
   refresh() {
+    // #!if debug
     const debug = _debug.extend("client:refresh");
 
-    debug("Attempting to refresh with refresh_token...");
+    debug("Attempting to refresh with refresh_token..."); // #!endif
+
     const refreshToken = getPath(this, "state.tokenResponse.refresh_token");
 
     if (!refreshToken) {
@@ -641,10 +666,12 @@ class FhirClient {
 
         return data;
       }).then(data => {
+        // #!debug
         debug("Received new access token %O", data);
         Object.assign(this.state.tokenResponse, data);
         return this.state;
       }).catch(error => {
+        // #!debug
         debug("Deleting the expired or invalid refresh token.");
         delete this.state.tokenResponse.refresh_token;
         throw error;

@@ -1,7 +1,10 @@
 /// <reference path="types.d.ts" />
 const {
     absolute,
+
+    // #!debug
     debug: _debug,
+
     getPath,
     setPath,
     jwtDecode,
@@ -13,6 +16,7 @@ const {
     units
 } = require("./lib");
 
+// #!debug
 const debug = _debug.extend("client");
 
 const str = require("./strings");
@@ -88,6 +92,7 @@ function resolveRefs(obj, fhirOptions, cache, client) {
     paths = paths.filter((p, i) => {
         let index = paths.indexOf(p, i + 1);
         if (index > -1) {
+            // #!debug
             debug("Duplicated reference path \"%s\"", p);
             return false;
         }
@@ -236,6 +241,7 @@ class FhirClient
             // We have been authorized against this server but we don't know
             // the patient. This should be a scope issue.
             if (!tokenResponse.patient) {
+                // #!if debug
                 if (!(this.state.scope || "").match(/\blaunch(\/patient)?\b/)) {
                     debug(str.noScopeForId, "patient", "patient");
                 }
@@ -243,17 +249,20 @@ class FhirClient
                     // The server should have returned the patient!
                     debug("The ID of the selected patient is not available. Please check if your server supports that.");
                 }
+                // #!endif
                 return null;
             }
             return tokenResponse.patient;
         }
 
+        // #!if debug
         if (this.state.authorizeUri) {
             debug(str.noIfNoAuth, "the ID of the selected patient");
         }
         else {
             debug(str.noFreeContext, "selected patient");
         }
+        // #!endif
         return null;
     }
 
@@ -270,6 +279,7 @@ class FhirClient
             // We have been authorized against this server but we don't know
             // the encounter. This should be a scope issue.
             if (!tokenResponse.encounter) {
+                // #!if debug
                 if (!(this.state.scope || "").match(/\blaunch(\/encounter)?\b/)) {
                     debug(str.noScopeForId, "encounter", "encounter");
                 }
@@ -277,17 +287,20 @@ class FhirClient
                     // The server should have returned the encounter!
                     debug("The ID of the selected encounter is not available. Please check if your server supports that, and that the selected patient has any recorded encounters.");
                 }
+                // #!endif
                 return null;
             }
             return tokenResponse.encounter;
         }
 
+        // #!if debug
         if (this.state.authorizeUri) {
             debug(str.noIfNoAuth, "the ID of the selected encounter");
         }
         else {
             debug(str.noFreeContext, "selected encounter");
         }
+        // #!endif
         return null;
     }
 
@@ -306,6 +319,7 @@ class FhirClient
             // We have been authorized against this server but we don't have
             // the id_token. This should be a scope issue.
             if (!idToken) {
+                // #!if debug
                 const hasOpenid   = scope.match(/\bopenid\b/);
                 const hasProfile  = scope.match(/\bprofile\b/);
                 const hasFhirUser = scope.match(/\bfhirUser\b/);
@@ -316,16 +330,19 @@ class FhirClient
                     // The server should have returned the id_token!
                     debug("The id_token is not available. Please check if your server supports that.");
                 }
+                // #!endif
                 return null;
             }
             return jwtDecode(idToken);
         }
+        // #!if debug
         if (this.state.authorizeUri) {
             debug(str.noIfNoAuth, "the id_token");
         }
         else {
             debug(str.noFreeContext, "id_token");
         }
+        // #!endif
         return null;
     }
 
@@ -400,6 +417,7 @@ class FhirClient
      */
     async request(requestOptions, fhirOptions = {}, _resolvedRefs = {})
     {
+        // #!debug
         const debug = _debug.extend("client:request");
         if (!requestOptions) {
             throw new Error("request requires an url or request options as argument");
@@ -439,17 +457,20 @@ class FhirClient
 
         const hasPageCallback = typeof fhirOptions.onPage == "function";
 
+        // #!if debug
         debug(
             "%s, options: %O, fhirOptions: %O",
             url,
             requestOptions,
             fhirOptions
         );
+        // #!endif
 
         return request(url, requestOptions)
 
             // Automatic re-auth via refresh token -----------------------------
             .catch(error => {
+                // #!debug
                 debug("%o", error);
                 if (error.status == 401 && fhirOptions.useRefreshToken !== false) {
                     const hasRefreshToken = getPath(this, "state.tokenResponse.refresh_token");
@@ -477,6 +498,7 @@ class FhirClient
                     // Session expired. Need to re-launch. Clear state to
                     // start over!
                     if (fhirOptions.useRefreshToken === false) {
+                        // #!debug
                         debug("Your session has expired and the useRefreshToken option is set to false. Please re-launch the app.");
                         await this._clearState();
                         throw new Error(str.expired);
@@ -484,6 +506,7 @@ class FhirClient
 
                     // otherwise -> auto-refresh failed. Session expired.
                     // Need to re-launch. Clear state to start over!
+                    // #!debug
                     debug("Auto-refresh failed! Please re-launch the app.");
                     await this._clearState();
                     throw new Error(str.expired);
@@ -491,6 +514,7 @@ class FhirClient
                 throw error;
             })
 
+            // #!if debug
             // Handle 403 ------------------------------------------------------
             .catch(error => {
                 if (error.status == 403) {
@@ -498,6 +522,7 @@ class FhirClient
                 }
                 throw error;
             })
+            // #!endif
 
             // Handle raw requests (anything other than json) ------------------
             .then(data => {
@@ -594,8 +619,10 @@ class FhirClient
      */
     refresh()
     {
+        // #!if debug
         const debug = _debug.extend("client:refresh");
         debug("Attempting to refresh with refresh_token...");
+        // #!endif
 
         const refreshToken = getPath(this, "state.tokenResponse.refresh_token");
         if (!refreshToken) {
@@ -630,10 +657,12 @@ class FhirClient
                 }
                 return data;
             }).then(data => {
+                // #!debug
                 debug("Received new access token %O", data);
                 Object.assign(this.state.tokenResponse, data);
                 return this.state;
             }).catch(error => {
+                // #!debug
                 debug("Deleting the expired or invalid refresh token.");
                 delete this.state.tokenResponse.refresh_token;
                 throw error;

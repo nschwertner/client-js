@@ -279,5 +279,7 @@ In the browser execute this in the console and then reload the page:
 ```js
 localStorage.debug = "FHIR.*"
 ```
+> Since `v2.0.8` debug logging is excluded from the production build (fhir-client.min.js and fhir-client.pure.min.js).
+
 
 

@@ -1,13 +1,17 @@
 const Client  = require("./Client");
 const {
     isBrowser,
+
+    // #!debug
     debug: _debug,
+
     request,
     getPath,
     randomString,
     btoa
 } = require("./lib");
 
+// #!debug
 const debug = _debug.extend("oauth2");
 
 const SMART_KEY = "SMART_KEY";
@@ -132,9 +136,11 @@ async function authorize(env, params = {}, _noRedirect = false)
         );
     }
 
+    // #!if debug
     if (iss) {
         debug("Making %s launch...", launch ? "EHR" : "standalone");
     }
+    // #!endif
 
     // append launch scope if needed
     if (launch && !scope.match(/launch/)) {
@@ -175,6 +181,7 @@ async function authorize(env, params = {}, _noRedirect = false)
 
     // bypass oauth if fhirServiceUrl is used (but iss takes precedence)
     if (fhirServiceUrl && !iss) {
+        // #!debug
         debug("Making fake launch...");
         // Storage.set(stateKey, state);
         await storage.set(stateKey, state);
@@ -256,6 +263,7 @@ async function completeAuth(env)
         throw new Error(msg);
     }
 
+    // #!debug
     debug("key: %s, code: %O", key, code);
 
     // key might be coming from the page url so it might be empty or missing
@@ -280,6 +288,7 @@ async function completeAuth(env)
         // every load!
         if (code) {
             params.delete("code");
+            // #!debug
             debug("Removed code parameter from the url.");
         }
 
@@ -291,6 +300,7 @@ async function completeAuth(env)
         // MUST keep the `state` url parameter.
         if (hasState && fullSessionStorageSupport) {
             params.delete("state");
+            // #!debug
             debug("Removed state parameter from the url.");
         }
 
@@ -313,13 +323,16 @@ async function completeAuth(env)
     // If we have state, then check to see if we got a `code`. If we don't,
     // then this is just a reload. Otherwise, we have to complete the code flow
     if (code) {
+        // #!debug
         debug("Preparing to exchange the code for access token...");
         const requestOptions = await buildTokenRequest(code, state);
+        // #!debug
         debug("Token request options: %O", requestOptions);
         // The EHR authorization server SHALL return a JSON structure that
         // includes an access token or a message indicating that the
         // authorization request has been denied.
         let tokenResponse = await request(state.tokenUri, requestOptions);
+        // #!debug
         debug("Token response: %O", tokenResponse);
         if (!tokenResponse.access_token) {
             throw new Error("Failed to obtain access token.");
@@ -331,16 +344,20 @@ async function completeAuth(env)
         if (fullSessionStorageSupport) {
             await Storage.set(SMART_KEY, key);
         }
+        // #!debug
         debug("Authorization successful!");
     }
+    // #!if debug
     else {
         debug(state.tokenResponse.access_token ?
             "Already authorized" :
             "No authorization needed"
         );
     }
+    // #!endif
 
     const client = new Client(env, state);
+    // #!debug
     debug("Created client instance: %O", client);
     return client;
 }
@@ -383,8 +400,10 @@ function buildTokenRequest(code, state)
         requestOptions.headers.Authorization = "Basic " + btoa(
             clientId + ":" + clientSecret
         );
+        // #!debug
         debug("Using state.clientSecret to construct the authorization header: %s", requestOptions.headers.Authorization);
     } else {
+        // #!debug
         debug("No clientSecret found in state. Adding the clientId to the POST body");
         requestOptions.body += `&client_id=${encodeURIComponent(clientId)}`;
     }

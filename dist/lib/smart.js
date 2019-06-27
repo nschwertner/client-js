@@ -2,12 +2,14 @@ const Client = require("./Client");
 
 const {
   isBrowser,
+  // #!debug
   debug: _debug,
   request,
   getPath,
   randomString,
   btoa
-} = require("./lib");
+} = require("./lib"); // #!debug
+
 
 const debug = _debug.extend("oauth2");
 
@@ -123,11 +125,13 @@ async function authorize(env, params = {}, _noRedirect = false) {
 
   if (!serverUrl) {
     throw new Error("No server url found. It must be specified as `iss` or as " + "`fhirServiceUrl` parameter");
-  }
+  } // #!if debug
+
 
   if (iss) {
     debug("Making %s launch...", launch ? "EHR" : "standalone");
-  } // append launch scope if needed
+  } // #!endif
+  // append launch scope if needed
 
 
   if (launch && !scope.match(/launch/)) {
@@ -169,6 +173,7 @@ async function authorize(env, params = {}, _noRedirect = false) {
   let redirectUrl = redirectUri + "?state=" + encodeURIComponent(stateKey); // bypass oauth if fhirServiceUrl is used (but iss takes precedence)
 
   if (fhirServiceUrl && !iss) {
+    // #!debug
     debug("Making fake launch..."); // Storage.set(stateKey, state);
 
     await storage.set(stateKey, state);
@@ -241,7 +246,8 @@ async function completeAuth(env) {
   if (authError || authErrorDescription) {
     let msg = [authError, authErrorDescription].filter(Boolean).join(": ");
     throw new Error(msg);
-  }
+  } // #!debug
+
 
   debug("key: %s, code: %O", key, code); // key might be coming from the page url so it might be empty or missing
 
@@ -260,7 +266,8 @@ async function completeAuth(env) {
     // We have to remove it, otherwise the page will authorize on
     // every load!
     if (code) {
-      params.delete("code");
+      params.delete("code"); // #!debug
+
       debug("Removed code parameter from the url.");
     } // If we have `fullSessionStorageSupport` it means we no longer
     // need the `state` key. It will be stored to a well know
@@ -271,7 +278,8 @@ async function completeAuth(env) {
 
 
     if (hasState && fullSessionStorageSupport) {
-      params.delete("state");
+      params.delete("state"); // #!debug
+
       debug("Removed state parameter from the url.");
     } // If the browser does not support the replaceState method for the
     // History Web API, the "code" parameter cannot be removed. As a
@@ -294,13 +302,16 @@ async function completeAuth(env) {
 
 
   if (code) {
+    // #!debug
     debug("Preparing to exchange the code for access token...");
-    const requestOptions = await buildTokenRequest(code, state);
+    const requestOptions = await buildTokenRequest(code, state); // #!debug
+
     debug("Token request options: %O", requestOptions); // The EHR authorization server SHALL return a JSON structure that
     // includes an access token or a message indicating that the
     // authorization request has been denied.
 
-    let tokenResponse = await request(state.tokenUri, requestOptions);
+    let tokenResponse = await request(state.tokenUri, requestOptions); // #!debug
+
     debug("Token response: %O", tokenResponse);
 
     if (!tokenResponse.access_token) {
@@ -316,14 +327,18 @@ async function completeAuth(env) {
 
     if (fullSessionStorageSupport) {
       await Storage.set(SMART_KEY, key);
-    }
+    } // #!debug
+
 
     debug("Authorization successful!");
-  } else {
-    debug(state.tokenResponse.access_token ? "Already authorized" : "No authorization needed");
-  }
+  } // #!if debug
+  else {
+      debug(state.tokenResponse.access_token ? "Already authorized" : "No authorization needed");
+    } // #!endif
 
-  const client = new Client(env, state);
+
+  const client = new Client(env, state); // #!debug
+
   debug("Created client instance: %O", client);
   return client;
 }
@@ -368,9 +383,11 @@ function buildTokenRequest(code, state) {
   // client_id and the password is the app’s client_secret (see example).
 
   if (clientSecret) {
-    requestOptions.headers.Authorization = "Basic " + btoa(clientId + ":" + clientSecret);
+    requestOptions.headers.Authorization = "Basic " + btoa(clientId + ":" + clientSecret); // #!debug
+
     debug("Using state.clientSecret to construct the authorization header: %s", requestOptions.headers.Authorization);
   } else {
+    // #!debug
     debug("No clientSecret found in state. Adding the clientId to the POST body");
     requestOptions.body += `&client_id=${encodeURIComponent(clientId)}`;
   }

@@ -2,7 +2,8 @@
  * This file contains some shared functions. The are used by other modules, but
  * are defined here so that tests can import this library and test them.
  */
-const HttpError = require("./HttpError");
+const HttpError = require("./HttpError"); // #!debug
+
 
 const debug = require("debug")("FHIR");
 
@@ -313,6 +314,7 @@ module.exports = {
   makeArray,
   randomString,
   isBrowser,
+  // #!debug
   debug,
   checkResponse,
   responseToJSON,

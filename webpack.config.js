@@ -42,27 +42,38 @@ module.exports = function(env, argv) {
                         path.resolve(__dirname, "src"),
                         path.resolve(__dirname, "node_modules/debug")
                     ],
-                    use: {
-                        loader: "babel-loader",
-                        options: {
-                            plugins: ["@babel/plugin-transform-runtime"],
-                            presets: argv.pure ? [] : [
-                                [
-                                    "@babel/preset-env",
-                                    {
-                                        useBuiltIns: "usage",
-                                        modules: "commonjs",
-                                        corejs: {
-                                            version: 3,
-                                            proposals: true
-                                        },
-                                        // debug: true,
-                                        loose: true, // needed for IE 10
-                                    }
+                    use: [
+                        {
+                            loader: "babel-loader",
+                            options: {
+                                plugins: ["@babel/plugin-transform-runtime"],
+                                presets: argv.pure ? [] : [
+                                    [
+                                        "@babel/preset-env",
+                                        {
+                                            useBuiltIns: "usage",
+                                            modules: "commonjs",
+                                            corejs: {
+                                                version: 3,
+                                                proposals: true
+                                            },
+                                            // debug: true,
+                                            loose: true, // needed for IE 10
+                                        }
+                                    ]
                                 ]
-                            ]
+                            }
+                        },
+                        {
+                            loader: "webpack-preprocessor-loader",
+                            options: {
+                                debug: isDev,
+                                params: {
+                                    debug: isDev
+                                }
+                            }
                         }
-                    }
+                    ]
                 }
             ]
         },
