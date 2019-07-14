@@ -424,7 +424,43 @@ declare namespace fhirclient {
          * authorized.
          */
         fakeTokenResponse?: object; 
+
+        /**
+         * Where to start the auth flow. This option is only applicable in
+         * browsers and is ignored on the server. Can be one of:
+         * - `_self`    Authorize in the same window (default)
+         * - `_top`     Authorize in the topmost window
+         * - `_parent`  Authorize in the parent window
+         * - `_blank`   Authorize in new tab or window
+         * - `popup`    Open a popup, authorize in it and close it when done
+         * - `String`   Frame name
+         * - `Object`   Window reference
+         * - `Function` A function that returns one of the above values or a
+         *              promise that will resolve to such value.
+         */
+        target?: AuthTarget | (() => AuthTarget) | (() => Promise<AuthTarget>);
+
+        /**
+         * The width of the authorization popup window. Only used in browsers
+         * and if the target option is set to `popup`.
+         */
+        width?: number;
+
+        /**
+         * The height of the authorization popup window. Only used in browsers
+         * and if the target option is set to `popup`.
+         */
+        height?: number;
+
+        /**
+         * If true, the app will be initialized in the specified target.
+         * Otherwise, the app will be initialized in the window in which
+         * `authorize` was called.
+         */
+        completeInTarget?: boolean;
     }
+
+    declare type AuthTarget = "_self"|"_top"|"_parent"|"_blank"|"popup"|string|Window;
 
     /**
      * Additional options that can be passed to `client.request` to control its

@@ -1,7 +1,9 @@
 const express = require("express");
 const cors    = require("cors");
 
-
+/**
+ * @type any
+ */
 const app = express();
 app.use(cors());
 
@@ -42,14 +44,15 @@ app.all("*", (req, res, next) => {
 
 
 app.use((err, _req, res, _next) => { // eslint-disable-line
-    console.error(err);
+    console.error(err);// eslint-disable-line
     res.status(500).send("Something broke!");
 });
 
+// @ts-ignore
 if (!module.parent) {
     const server = app.listen(3456, "0.0.0.0", () => {
         const addr = server.address();
-        console.log(`Server listening at 0.0.0.0:${addr.port}`);
+        console.log(`Server listening at 0.0.0.0:${addr.port}`);// eslint-disable-line
     });
 }
 

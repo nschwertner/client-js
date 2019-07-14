@@ -79,6 +79,13 @@ function getSecurityExtensions(baseUrl = "/")
     }));
 }
 
+function onMessage(e) {
+    if(e.data.type == "completeAuth") {
+        window.removeEventListener("message", onMessage);
+        window.location.assign(e.data.url);
+    }
+}
+
 /**
  * @param {Object} env
  * @param {fhirclient.AuthorizeParams} params
@@ -101,7 +108,11 @@ async function authorize(env, params = {}, _noRedirect = false)
         patientId,
         encounterId,
         client_id,
-        clientId
+        clientId,
+        target,
+        width,
+        height,
+        completeInTarget
     } = params;
 
     const url     = env.getUrl();
@@ -159,7 +170,8 @@ async function authorize(env, params = {}, _noRedirect = false)
         serverUrl,
         clientSecret,
         tokenResponse: {},
-        key: stateKey
+        key: stateKey,
+        completeInTarget: !!completeInTarget
     };
 
     // fakeTokenResponse to override stuff (useful in development)
@@ -225,8 +237,48 @@ async function authorize(env, params = {}, _noRedirect = false)
         return redirectUrl;
     }
 
+    // -------------------------------------------------------------------------
+    if (isBrowser()) {
+        let win = await env.loadUrl(redirectUrl, { target, width, height });
+        // if (win && win !== self && !completeInTarget) {
+        //     self.addEventListener("message", onMessage);
+        // }
+        // console.log(win, win === self);
+        if (win && win !== self) {
+            return new Promise((resolve) => {
+                if (!completeInTarget) {
+                    self.addEventListener("message", e => {
+                        onMessage(e);
+                        resolve(redirectUrl);
+                    });
+                }
+            });
+        }
+    }
+
     return await env.redirect(redirectUrl);
 }
+
+function inIframe() {
+    try {
+        return window.self !== window.top && window.parent;
+    } catch (e) {
+        return true;
+    }
+}
+
+function inPopUp() {
+    try {
+        return window.self === window.top &&
+               window.opener &&
+               window.opener !== window.self &&
+               window.name &&
+               window.name != "x";
+    } catch (e) {
+        return false;
+    }
+}
+
 
 /**
  * The completeAuth function should only be called on the page that represents
@@ -273,6 +325,31 @@ async function completeAuth(env)
 
     // Check if we have a previous state
     let state = await Storage.get(key);
+
+    // If we are in the popup window or an iframe and the authorization is
+    // complete, send the location back to our opener and exit.
+    if (isBrowser() && state && !state.completeInTarget) {
+        const { href, origin } = url;
+        if (inIframe()) {
+            // console.log(state)
+            window.parent.postMessage({
+                type: "completeAuth",
+                url : href
+            }, origin);
+            return new Promise(() => { /* leave it pending!!! */ });
+        }
+
+        if (inPopUp()) {
+            // const { href, origin } = env.getUrl();
+            window.opener.postMessage({
+                type: "completeAuth",
+                url : href
+            }, origin);
+            if (window.name.indexOf("smartAuthPopup") === 0) window.close();
+            return new Promise(() => { /* leave it pending!!! */ });
+        }
+        // return new Promise(() => { /* leave it pending!!! */ });
+    }
 
     const fullSessionStorageSupport = isBrowser() ?
         getPath(env, "options.fullSessionStorageSupport") :

@@ -2,6 +2,7 @@
 const EventEmitter  = require("events");
 const MemoryStorage = require("./MemoryStorage");
 const Location      = require("./Location");
+const Adapter       = require("../../src/adapters/BrowserAdapter").Adapter;
 
 class BrowserEnvironment extends EventEmitter
 {
@@ -18,6 +19,7 @@ class BrowserEnvironment extends EventEmitter
 
     get fhir()
     {
+        // @ts-ignore
         return typeof fhir === "function" ? fhir : null;
     }
 
@@ -43,6 +45,12 @@ class BrowserEnvironment extends EventEmitter
     relative(url)
     {
         return new URL(url, this._location.href).href;
+    }
+
+    async loadUrl(...args)
+    {
+        // this.redirect(url);
+        return Adapter.prototype.loadUrl.apply(this, args);
     }
 }
 

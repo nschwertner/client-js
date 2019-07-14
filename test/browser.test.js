@@ -53,10 +53,18 @@ after(() => {
 
 beforeEach(() => {
     global.window = new Window();
+    global.self   = window;
+    global.top    = window.top;
+    global.parent = window.parent;
+    global.frames = window.frames;
 });
 
 afterEach(() => {
     mockServer.clear();
+    delete global.self;
+    delete global.top;
+    delete global.parent;
+    delete global.frames;
     delete global.window;
     // window.FHIR.oauth2.settings.fullSessionStorageSupport = true;
     // window.FHIR.oauth2.settings.replaceBrowserHistory = true;
@@ -122,7 +130,7 @@ describe ("Complete authorization", () => {
         const client = await smart.completeAuth(env);
 
         // make sure tha browser history was replaced
-        expect(window.history._location).to.equal("http://localhost/");
+        expect(window.history._location.href).to.equal("http://localhost/");
 
         expect(await Storage.get(smart.KEY), `must have set a state at ${smart.KEY}`).to.exist();
         expect(client.getPatientId()).to.equal("b2536dd3-bccd-4d22-8355-ab20acdf240b");
@@ -191,7 +199,7 @@ describe ("Complete authorization", () => {
         const client = await smart.completeAuth(env);
 
         // make sure tha browser history was not replaced
-        expect(window.history._location).to.equal("");
+        expect(env._location.href).to.equal("http://localhost/?code=123&state=" + key);
 
         expect(
             await Storage.get(smart.KEY),
@@ -828,4 +836,60 @@ describe("smart", () => {
             expect(client.getUserType()).to.equal("Practitioner");
         });
     });
+});
+
+describe("Targets", () => {
+    describe("_self", () => {});
+    it("_top", async () => {
+
+        const env     = new BrowserEnv();
+        const storage = env.getStorage();
+
+        // mock our oauth endpoints
+        mockServer.mock({
+            headers: { "content-type": "application/json" },
+            status: 200,
+            body: {
+                authorization_endpoint: mockUrl,
+                token_endpoint: mockUrl
+            }
+        });
+
+        global.top = window.top = new Window();
+
+        await new Promise(resolve => {
+            top.location.once("change", value => {
+                console.log(`top.location changed to ${value}`);
+                resolve();
+            });
+
+            // Call our launch code.
+            smart.authorize(env, {
+                iss      : mockUrl,
+                launch   : "123",
+                scope    : "my_scope",
+                client_id: "my_client_id",
+                target   : "_top"
+            });
+        });
+
+        // Now we have been redirected to `redirect` and then back to our
+        // redirect_uri. It is time to complete the authorization. All that
+        // should have happened in the "top" frame.
+        console.log(top.location, self.location, window.location);
+        const redirect = new URL(top.location.href);
+
+        // Get the state parameter from the URL
+        const state = redirect.searchParams.get("state");
+
+        expect(await storage.get(state), "must have set a state at " + state).to.exist();
+    });
+    describe("_blank", () => {});
+    describe("_parent", () => {});
+    describe("frame name", () => {});
+    describe("frame reference", () => {});
+    describe("window reference", () => {});
+    describe("popup", () => {});
+    describe("function -> string", () => {});
+    describe("function -> Promise", () => {});
 });

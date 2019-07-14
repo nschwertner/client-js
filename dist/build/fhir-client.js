@@ -10647,6 +10647,8 @@ var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/inte
 
 __webpack_require__(/*! core-js/modules/es.array.iterator */ "./node_modules/core-js/modules/es.array.iterator.js");
 
+__webpack_require__(/*! core-js/modules/es.array.join */ "./node_modules/core-js/modules/es.array.join.js");
+
 __webpack_require__(/*! core-js/modules/es.object.to-string */ "./node_modules/core-js/modules/es.object.to-string.js");
 
 __webpack_require__(/*! core-js/modules/es.string.iterator */ "./node_modules/core-js/modules/es.string.iterator.js");
@@ -10654,6 +10656,12 @@ __webpack_require__(/*! core-js/modules/es.string.iterator */ "./node_modules/co
 __webpack_require__(/*! core-js/modules/web.dom-collections.iterator */ "./node_modules/core-js/modules/web.dom-collections.iterator.js");
 
 __webpack_require__(/*! core-js/modules/web.url */ "./node_modules/core-js/modules/web.url.js");
+
+var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js"));
+
+__webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/regenerator-runtime/runtime.js");
+
+var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/asyncToGenerator.js"));
 
 var _createClass2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/createClass */ "./node_modules/@babel/runtime/helpers/createClass.js"));
 
@@ -10663,6 +10671,8 @@ var _inheritsLoose2 = _interopRequireDefault(__webpack_require__(/*! @babel/runt
 var BrowserStorage = __webpack_require__(/*! ../storage/BrowserStorage */ "./src/storage/BrowserStorage.js");
 
 var BaseAdapter = __webpack_require__(/*! ./BaseAdapter */ "./src/adapters/BaseAdapter.js");
+
+var debug = __webpack_require__(/*! ../lib */ "./src/lib.js").debug;
 /**
  * Browser Adapter
  * @type {fhirclient.Adapter}
@@ -10716,7 +10726,184 @@ function (_BaseAdapter) {
     }
 
     return this._storage;
-  };
+  }
+  /**
+   * Loads the @url into specific browsing context (new tab or window, iframe,
+   * popup...).
+   * @param {String} url
+   * @param {Object} [options]
+   * @param {fhirclient.AuthTarget | (() => fhirclient.AuthTarget) | (() => Promise<fhirclient.AuthTarget>)} [options.target]
+   * @param {number} [options.width]
+   * @param {number} [options.height]
+   * @returns {Promise<Window>}
+   */
+  ;
+
+  _proto.loadUrl =
+  /*#__PURE__*/
+  function () {
+    var _loadUrl = (0, _asyncToGenerator2.default)(
+    /*#__PURE__*/
+    _regenerator.default.mark(function _callee(url, options) {
+      var _options, _options$target, target, _options$width, width, _options$height, height, win;
+
+      return _regenerator.default.wrap(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              if (options === void 0) {
+                options = {};
+              }
+
+              _options = options, _options$target = _options.target, target = _options$target === void 0 ? "_self" : _options$target, _options$width = _options.width, width = _options$width === void 0 ? 800 : _options$width, _options$height = _options.height, height = _options$height === void 0 ? 720 : _options$height; // The target can be a function that returns the target. This can be
+              // used to open a layer pop-up with an iframe and then return a reference
+              // to that iframe (or its name)
+
+              if (!(typeof target == "function")) {
+                _context.next = 6;
+                break;
+              }
+
+              _context.next = 5;
+              return target();
+
+            case 5:
+              target = _context.sent;
+
+            case 6:
+              if (!(target && typeof target == "object")) {
+                _context.next = 16;
+                break;
+              }
+
+              _context.prev = 7;
+              target.location.assign(url);
+              return _context.abrupt("return", target);
+
+            case 12:
+              _context.prev = 12;
+              _context.t0 = _context["catch"](7);
+              debug("Cannot load url into the specified target. Failing back to '_self'.");
+              target = "_self";
+
+            case 16:
+              // At this point target must be a string
+              if (typeof target != "string") {
+                debug("Invalid target type '%s'. Failing back to '_self'.", typeof target);
+                target = "_self";
+              } // New tab or window
+
+
+              if (!(target == "_blank")) {
+                _context.next = 27;
+                break;
+              }
+
+              _context.prev = 18;
+              target = window.open(url);
+              return _context.abrupt("return", target);
+
+            case 23:
+              _context.prev = 23;
+              _context.t1 = _context["catch"](18);
+              debug("Cannot open new tab or window. Failing back to '_self'.");
+              target = "_self";
+
+            case 27:
+              if (!(target == "_parent")) {
+                _context.next = 37;
+                break;
+              }
+
+              _context.prev = 28;
+              parent.location.assign(url);
+              return _context.abrupt("return", parent);
+
+            case 33:
+              _context.prev = 33;
+              _context.t2 = _context["catch"](28);
+              debug("Cannot modify parent location. Failing back to '_self'.");
+              target = "_self";
+
+            case 37:
+              if (!(target == "_top")) {
+                _context.next = 47;
+                break;
+              }
+
+              _context.prev = 38;
+              top.location.assign(url);
+              return _context.abrupt("return", top);
+
+            case 43:
+              _context.prev = 43;
+              _context.t3 = _context["catch"](38);
+              debug("Cannot modify top location. Failing back to '_self'.");
+              target = "_self";
+
+            case 47:
+              if (!(target == "popup")) {
+                _context.next = 55;
+                break;
+              }
+
+              win = self.open(url, "smartAuthPopup", ["height=" + height, "width=" + width, "menubar=0", "resizable=1", "status=0", "top=" + (screen.height - height) / 2, "left=" + (screen.width - width) / 2].join(","));
+
+              if (win) {
+                _context.next = 54;
+                break;
+              }
+
+              debug("Cannot open a popup window. Failing back to '_self'.");
+              target = "_self";
+              _context.next = 55;
+              break;
+
+            case 54:
+              return _context.abrupt("return", win);
+
+            case 55:
+              if (!frames[target]) {
+                _context.next = 65;
+                break;
+              }
+
+              _context.prev = 56;
+              frames[target].location.assign(url);
+              return _context.abrupt("return", frames[target]);
+
+            case 61:
+              _context.prev = 61;
+              _context.t4 = _context["catch"](56);
+              debug("Cannot load url into the specified target. Failing back to '_self'.");
+              target = "_self";
+
+            case 65:
+              if (!(target == "_self")) {
+                _context.next = 68;
+                break;
+              }
+
+              self.location.assign(url);
+              return _context.abrupt("return", self);
+
+            case 68:
+              throw new Error("Unknown target " + target);
+
+            case 69:
+            case "end":
+              return _context.stop();
+          }
+        }
+      }, _callee, null, [[7, 12], [18, 23], [28, 33], [38, 43], [56, 61]]);
+    }));
+
+    function loadUrl(_x, _x2) {
+      return _loadUrl.apply(this, arguments);
+    }
+
+    return loadUrl;
+  }();
 
   BrowserAdapter.smart = function smart(options) {
     return new BrowserAdapter(options).getSmartApi();
@@ -11277,6 +11464,8 @@ __webpack_require__(/*! core-js/modules/es.array.join */ "./node_modules/core-js
 
 __webpack_require__(/*! core-js/modules/es.array.map */ "./node_modules/core-js/modules/es.array.map.js");
 
+__webpack_require__(/*! core-js/modules/es.function.name */ "./node_modules/core-js/modules/es.function.name.js");
+
 __webpack_require__(/*! core-js/modules/es.object.assign */ "./node_modules/core-js/modules/es.object.assign.js");
 
 __webpack_require__(/*! core-js/modules/es.object.to-string */ "./node_modules/core-js/modules/es.object.to-string.js");
@@ -11387,6 +11576,13 @@ function getSecurityExtensions(baseUrl) {
     });
   });
 }
+
+function onMessage(e) {
+  if (e.data.type == "completeAuth") {
+    window.removeEventListener("message", onMessage);
+    window.location.assign(e.data.url);
+  }
+}
 /**
  * @param {Object} env
  * @param {fhirclient.AuthorizeParams} params
@@ -11399,19 +11595,12 @@ function getSecurityExtensions(baseUrl) {
 function authorize(_x, _x2, _x3) {
   return _authorize.apply(this, arguments);
 }
-/**
- * The completeAuth function should only be called on the page that represents
- * the redirectUri. We typically land there after a redirect from the
- * authorization server..
- * @returns { Promise<fhirclient.Client> }
- */
-
 
 function _authorize() {
   _authorize = (0, _asyncToGenerator2.default)(
   /*#__PURE__*/
   _regenerator.default.mark(function _callee(env, params, _noRedirect) {
-    var _params, iss, launch, fhirServiceUrl, redirect_uri, redirectUri, _params$scope, scope, clientSecret, fakeTokenResponse, patientId, encounterId, client_id, clientId, url, storage, serverUrl, stateKey, state, redirectUrl, extensions, redirectParams;
+    var _params, iss, launch, fhirServiceUrl, redirect_uri, redirectUri, _params$scope, scope, clientSecret, fakeTokenResponse, patientId, encounterId, client_id, clientId, target, width, height, completeInTarget, url, storage, serverUrl, stateKey, state, redirectUrl, extensions, redirectParams, win;
 
     return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
@@ -11426,7 +11615,7 @@ function _authorize() {
             }
 
             // Obtain input
-            _params = params, iss = _params.iss, launch = _params.launch, fhirServiceUrl = _params.fhirServiceUrl, redirect_uri = _params.redirect_uri, redirectUri = _params.redirectUri, _params$scope = _params.scope, scope = _params$scope === void 0 ? "" : _params$scope, clientSecret = _params.clientSecret, fakeTokenResponse = _params.fakeTokenResponse, patientId = _params.patientId, encounterId = _params.encounterId, client_id = _params.client_id, clientId = _params.clientId;
+            _params = params, iss = _params.iss, launch = _params.launch, fhirServiceUrl = _params.fhirServiceUrl, redirect_uri = _params.redirect_uri, redirectUri = _params.redirectUri, _params$scope = _params.scope, scope = _params$scope === void 0 ? "" : _params$scope, clientSecret = _params.clientSecret, fakeTokenResponse = _params.fakeTokenResponse, patientId = _params.patientId, encounterId = _params.encounterId, client_id = _params.client_id, clientId = _params.clientId, target = _params.target, width = _params.width, height = _params.height, completeInTarget = _params.completeInTarget;
             url = env.getUrl();
             storage = env.getStorage(); // For these three an url param takes precedence over inline option
 
@@ -11481,7 +11670,8 @@ function _authorize() {
               serverUrl: serverUrl,
               clientSecret: clientSecret,
               tokenResponse: {},
-              key: stateKey
+              key: stateKey,
+              completeInTarget: !!completeInTarget
             }; // fakeTokenResponse to override stuff (useful in development)
 
             if (fakeTokenResponse) {
@@ -11577,13 +11767,43 @@ function _authorize() {
             return _context.abrupt("return", redirectUrl);
 
           case 50:
-            _context.next = 52;
-            return env.redirect(redirectUrl);
+            if (!isBrowser()) {
+              _context.next = 56;
+              break;
+            }
 
-          case 52:
-            return _context.abrupt("return", _context.sent);
+            _context.next = 53;
+            return env.loadUrl(redirectUrl, {
+              target: target,
+              width: width,
+              height: height
+            });
 
           case 53:
+            win = _context.sent;
+
+            if (!(win && win !== self)) {
+              _context.next = 56;
+              break;
+            }
+
+            return _context.abrupt("return", new Promise(function (resolve) {
+              if (!completeInTarget) {
+                self.addEventListener("message", function (e) {
+                  onMessage(e);
+                  resolve(redirectUrl);
+                });
+              }
+            }));
+
+          case 56:
+            _context.next = 58;
+            return env.redirect(redirectUrl);
+
+          case 58:
+            return _context.abrupt("return", _context.sent);
+
+          case 59:
           case "end":
             return _context.stop();
         }
@@ -11592,6 +11812,29 @@ function _authorize() {
   }));
   return _authorize.apply(this, arguments);
 }
+
+function inIframe() {
+  try {
+    return window.self !== window.top && window.parent;
+  } catch (e) {
+    return true;
+  }
+}
+
+function inPopUp() {
+  try {
+    return window.self === window.top && window.opener && window.opener !== window.self && window.name && window.name != "x";
+  } catch (e) {
+    return false;
+  }
+}
+/**
+ * The completeAuth function should only be called on the page that represents
+ * the redirectUri. We typically land there after a redirect from the
+ * authorization server..
+ * @returns { Promise<fhirclient.Client> }
+ */
+
 
 function completeAuth(_x4) {
   return _completeAuth.apply(this, arguments);
@@ -11606,7 +11849,7 @@ function _completeAuth() {
   _completeAuth = (0, _asyncToGenerator2.default)(
   /*#__PURE__*/
   _regenerator.default.mark(function _callee2(env) {
-    var url, Storage, params, key, code, authError, authErrorDescription, msg, state, fullSessionStorageSupport, hasState, requestOptions, tokenResponse, client;
+    var url, Storage, params, key, code, authError, authErrorDescription, msg, state, href, origin, fullSessionStorageSupport, hasState, requestOptions, tokenResponse, client;
     return _regenerator.default.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
@@ -11655,6 +11898,45 @@ function _completeAuth() {
 
           case 19:
             state = _context2.sent;
+
+            if (!(isBrowser() && state && !state.completeInTarget)) {
+              _context2.next = 29;
+              break;
+            }
+
+            href = url.href, origin = url.origin;
+
+            if (!inIframe()) {
+              _context2.next = 25;
+              break;
+            }
+
+            // console.log(state)
+            window.parent.postMessage({
+              type: "completeAuth",
+              url: href
+            }, origin);
+            return _context2.abrupt("return", new Promise(function () {
+              /* leave it pending!!! */
+            }));
+
+          case 25:
+            if (!inPopUp()) {
+              _context2.next = 29;
+              break;
+            }
+
+            // const { href, origin } = env.getUrl();
+            window.opener.postMessage({
+              type: "completeAuth",
+              url: href
+            }, origin);
+            if (window.name.indexOf("smartAuthPopup") === 0) window.close();
+            return _context2.abrupt("return", new Promise(function () {
+              /* leave it pending!!! */
+            }));
+
+          case 29:
             fullSessionStorageSupport = isBrowser() ? getPath(env, "options.fullSessionStorageSupport") : true; // Do we have to remove the `code` and `state` params from the URL?
 
             hasState = params.has("state");
@@ -11692,74 +11974,74 @@ function _completeAuth() {
 
 
             if (state) {
-              _context2.next = 25;
+              _context2.next = 34;
               break;
             }
 
             throw new Error("No state found! Please (re)launch the app.");
 
-          case 25:
+          case 34:
             if (!code) {
-              _context2.next = 46;
+              _context2.next = 55;
               break;
             }
 
             debug("Preparing to exchange the code for access token...");
-            _context2.next = 29;
+            _context2.next = 38;
             return buildTokenRequest(code, state);
 
-          case 29:
+          case 38:
             requestOptions = _context2.sent;
             debug("Token request options: %O", requestOptions); // The EHR authorization server SHALL return a JSON structure that
             // includes an access token or a message indicating that the
             // authorization request has been denied.
 
-            _context2.next = 33;
+            _context2.next = 42;
             return request(state.tokenUri, requestOptions);
 
-          case 33:
+          case 42:
             tokenResponse = _context2.sent;
             debug("Token response: %O", tokenResponse);
 
             if (tokenResponse.access_token) {
-              _context2.next = 37;
+              _context2.next = 46;
               break;
             }
 
             throw new Error("Failed to obtain access token.");
 
-          case 37:
+          case 46:
             // save the tokenResponse so that we don't have to re-authorize on
             // every page reload
             state = Object.assign({}, state, {
               tokenResponse: tokenResponse
             });
-            _context2.next = 40;
+            _context2.next = 49;
             return Storage.set(key, state);
 
-          case 40:
+          case 49:
             if (!fullSessionStorageSupport) {
-              _context2.next = 43;
+              _context2.next = 52;
               break;
             }
 
-            _context2.next = 43;
+            _context2.next = 52;
             return Storage.set(SMART_KEY, key);
 
-          case 43:
+          case 52:
             debug("Authorization successful!");
-            _context2.next = 47;
+            _context2.next = 56;
             break;
 
-          case 46:
+          case 55:
             debug(state.tokenResponse.access_token ? "Already authorized" : "No authorization needed");
 
-          case 47:
+          case 56:
             client = new Client(env, state);
             debug("Created client instance: %O", client);
             return _context2.abrupt("return", client);
 
-          case 50:
+          case 59:
           case "end":
             return _context2.stop();
         }

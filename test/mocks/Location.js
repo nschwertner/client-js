@@ -1,12 +1,11 @@
-function Location(url)
+module.exports = class Location
 {
-    return {
-        href: url,
+    constructor(url)
+    {
+        this.href = url;
+    }
 
-        toString() {
-            return url;
-        }
-    };
+    toString() {
+        return this.href;
+    }
 }
-
-module.exports = Location;
